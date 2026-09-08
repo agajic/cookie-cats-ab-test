@@ -60,6 +60,12 @@ Chi-square test of independence on the 2×2 table (interview-friendly, tests dep
 ### D7 — Bootstrap: 1,000 iterations
 Resample players with replacement 1,000×, recompute the gap each time. **Why:** turns the yes/no p-value into a *range* + a *confidence* ("how big, how sure"), which is what a product manager actually needs. Seed fixed (42) for reproducibility.
 
+### D8 — Include the optional prediction model (Phase 4)
+Logistic regression predicting `retention_7`. **Why include:** the Nordeus posting lists *"Applied Machine Learning"*, so a small, fully-understood model strengthens the fit. **Key result & the real lesson:** AUC = 0.88 looked strong, but `sum_gamerounds` (14-day window) leaks information from *past* the day-7 target. Dropping it → AUC 0.72, the honest number. Reported both, with the leakage called out.
+
+### D9 — Recommendation
+**Keep the gate at level 30; do not ship the move to 40.** Confident in the direction, modest in size, with revenue flagged as an unmeasured trade-off.
+
 ---
 
 ## Findings (Phase 2)
@@ -84,8 +90,10 @@ Resample players with replacement 1,000×, recompute the gap each time. **Why:**
 - [x] Primary metric → `retention_7` (D5)
 - [x] Significance test → chi-square + z-test (D6)
 - [x] Bootstrap → 1,000 iterations (D7)
-- [ ] **Recommendation** to the game team (Andrej to draft in his own words)
-- [ ] **Stretch model (optional):** logistic regression to predict `retention_7`?
+- [x] Stretch model → included (D8)
+- [x] Recommendation → keep gate at 30 (D9)
+
+All core decisions locked. Deliverable: `cookie_cats_ab_test.ipynb` + `README.md`.
 
 ---
 
@@ -94,4 +102,4 @@ Resample players with replacement 1,000×, recompute the gap each time. **Why:**
 | # | What we broke | My prediction | What actually happened | Lesson |
 |---|---|---|---|---|
 | 1 | Drop vs keep the outlier player | could mess up the analysis | gap +0.820 → +0.818 pp, p 0.00160 → 0.00164 — **no change** | An outlier's danger depends on the metric: it wrecks an *average* but is invisible to a *rate* (1 row in 90k). |
-| 2 | Bootstrap with 50 iterations instead of 1,000 | _(pending)_ | _(pending)_ | _(pending)_ |
+| 2 | Remove the leaky `sum_gamerounds` from the model | it drops | AUC 0.88 → 0.72 | That 0.16 was leakage — a 14-day feature peeking past the 7-day target. 0.72 is the honest number. |
