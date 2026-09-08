@@ -26,71 +26,54 @@ you do this?", the answer is written down here in plain words — and it's *mine
 
 ## Predictions locked in *before* seeing any results
 
-- **Hypothesis under test (H1):** moving the gate from level 30 to level 40
-  changes 7-day retention.
-- **Null (H0):** retention is the same in both groups; any gap is noise.
-- **My prediction (Andrej, before data):** moving the gate 30 → 40 **raised**
-  retention — i.e. `gate_40` retains *better*.
-  *(Honesty note: my first phrasing said "lowered"; that was a wording slip —
-  my actual reasoning was Theory A below, which predicts gate_40 is better.)*
-- **My mechanism — Theory A (momentum / sunk-cost):** letting players reach
-  level 40 before the wall means they've invested more and formed a habit, so
-  they're more likely to keep playing. A later gate → better retention.
-- **The competing story I'm betting against — Theory B (forced-break /
-  anti-burnout):** a gate is a forced pause; hitting it *earlier* (30) makes
-  players stop while they still want more, so they come back. Earlier gate →
-  better retention. The data decides between A and B.
+- **Hypothesis (H1):** moving the gate 30 → 40 changes 7-day retention. **Null (H0):** no difference; any gap is noise.
+- **My prediction (Andrej, before data):** moving the gate 30 → 40 **raised** retention — `gate_40` retains *better*.
+  *(Honesty note: my first phrasing said "lowered" — a wording slip; my actual reasoning was Theory A, which predicts gate_40 better.)*
+- **Theory A (mine — momentum/sunk-cost):** reaching level 40 before the wall = more invested, habit formed → later gate retains better.
+- **Theory B (the rival):** a gate is a forced pause; hitting it *earlier* (30) makes players stop while they still want more → earlier gate retains better.
 
 ---
 
 ## Decisions
 
 ### D0 — Project choice
-**Decision:** Build a clean A/B analysis of the Cookie Cats retention experiment.
-**Why:** Nordeus's posting names *"a main focus on AB testing"* and *"modelling
-user behaviour from real data."* This is exactly that, on real mobile-game data —
-not a generic Titanic/Iris demo. Small enough to understand every line.
+Build a clean A/B analysis of the Cookie Cats retention experiment. **Why:** matches Nordeus's *"main focus on AB testing"* on real mobile-game data; small enough to understand every line.
 
 ### D1 — Working mode
-**Decision:** Coached loop (decide → generate → break), not "AI writes it, I read it."
-**Why:** The value of this project is that I can *defend* it in an interview.
-Reading an explanation of code gives a weak, borrowed understanding that collapses
-under one follow-up. Deciding first and breaking things after builds understanding
-I can defend.
+Coached loop (decide → generate → break), not "AI writes it, I read it". **Why:** the project's value is that I can *defend* it; reading an explanation gives borrowed understanding that collapses under a follow-up.
 
-### D2 — Where we build vs. where I run
-**Decision:** Build & verify the canonical notebook in the repo; use Google Colab
-as the hands-on surface to re-run and break it.
-**Why:** Building where the code actually executes means no broken cells reach the
-repo. Re-running it myself in Colab is where I take ownership.
+### D2 — Where we build vs. run
+Build & verify the canonical notebook in the repo; use Google Colab as the hands-on surface. **Why:** no broken cells reach the repo; re-running it myself is where I take ownership.
 
 ### D3 — Sample Ratio Mismatch (SRM): proceed and document
-**Decision:** Note the SRM, but proceed with the analysis.
-**Why:** Split is 44,700 / 45,489 (49.56% / 50.44%). A binomial test vs a perfect
-50/50 gives p = 0.0087, so the deviation is *statistically* detectable — but only
-because n is huge (1 SD of noise ≈ ±0.17pp; we're ~2.6 SD out). The deviation is
-just 0.44pp, and the gate **cannot** have caused it: assignment happens at install,
-long before a player ever reaches level 30 or 40. So: small + mechanistically
-impossible to be a treatment effect → proceed, and write down the caveat.
-Interview line: *"I check SRM first; here it was flagged but tiny and can't be
-caused by the treatment, so I proceeded and documented it."*
+Split 44,700 / 45,489 (49.56% / 50.44%); binomial vs 50/50 gives p = 0.0087. Statistically flagged, but only because n is huge (1 SD ≈ ±0.17pp; ~2.6 SD out). Deviation is 0.44pp and the gate **cannot** cause it (assignment at install, before any gate). **→ proceed, document the caveat.**
 
 ### D4 — The outlier player: drop it
-**Decision:** Remove `userid 6390605` (49,854 rounds in 14 days).
-**Why:** ~3,560 rounds/day is not a real human (bot or logging error), and it
-badly distorts engagement summaries and any round-count model. It's also
-internally weird (retention_1=False but retention_7=True).
-**Open prediction to test:** I expect it *could* mess up the analysis — but
-retention is one True/False per player, so this is 1 row in ~44,700. **Break-it
-experiment #1** will measure the actual effect on the retention gap.
+Remove `userid 6390605` (49,854 rounds in 14 days ≈ 3,560/day — bot or logging error). Distorts engagement stats and any round-count model. Break-it #1 confirmed it does **not** affect the retention result.
 
 ### D5 — Primary metric: `retention_7` (secondary: `retention_1`)
-**Decision:** 7-day retention is the primary outcome, chosen before seeing results.
-**Why:** Almost every game has decent day-1 retention (novelty, curiosity); it's
-easy and noisy. Day-7 retention is the signal that a *lasting habit* formed, which
-is what actually matters for a game's long-term health. `retention_1` is kept as a
-secondary check — agreement across both is more convincing; a conflict is worth
-explaining.
+Day-1 retention is easy and noisy (novelty); day-7 signals a *lasting habit*. Chosen before seeing results. `retention_1` kept as a secondary consistency check.
+
+### D6 — Significance test: chi-square (z-test as confirmation)
+Chi-square test of independence on the 2×2 table (interview-friendly, tests dependence directly). Two-proportion z-test run alongside as a cross-check. **Why two:** they're the same math for a 2×2 (z² ≈ chi²), so agreement is a sanity check, not new evidence.
+
+### D7 — Bootstrap: 1,000 iterations
+Resample players with replacement 1,000×, recompute the gap each time. **Why:** turns the yes/no p-value into a *range* + a *confidence* ("how big, how sure"), which is what a product manager actually needs. Seed fixed (42) for reproducibility.
+
+---
+
+## Findings (Phase 2)
+
+**Primary — 7-day retention** *(outlier dropped)*
+- gate_30 = **19.02%**, gate_40 = **18.20%** → gap **+0.82 pp** (gate_30 better; −4.3% relative for gate_40)
+- chi-square **p = 0.0016** (z-test agrees) → **statistically significant**
+- bootstrap: gate_30 ahead in **1000/1000** resamples; 95% CI **[+0.32, +1.34] pp** (never crosses 0)
+
+**Secondary — 1-day retention**
+- gate_30 = 44.82%, gate_40 = 44.23% → gap **+0.59 pp**, **p = 0.075 → not significant**
+- **same direction** as day-7, weaker signal — consistent with day-1 being noisier (vindicates the primary-metric choice)
+
+**Verdict on the theories:** the data supports **Theory B** (earlier gate retains better), contradicting my Theory A prediction. Effect is **small in size but rock-solid in direction.**
 
 ---
 
@@ -99,17 +82,16 @@ explaining.
 - [x] SRM → proceed & document (D3)
 - [x] Outlier → drop (D4)
 - [x] Primary metric → `retention_7` (D5)
-- [ ] **Significance test:** chi-square vs two-proportion z-test — which, and why?
-- [ ] **Bootstrap:** how many iterations, and what does it add over the p-value?
+- [x] Significance test → chi-square + z-test (D6)
+- [x] Bootstrap → 1,000 iterations (D7)
+- [ ] **Recommendation** to the game team (Andrej to draft in his own words)
 - [ ] **Stretch model (optional):** logistic regression to predict `retention_7`?
 
 ---
 
 ## Break-it experiments (predict first, then run)
 
-_Logged as we do them: what we changed, what I predicted, what actually happened,
-and what it taught me._
-
 | # | What we broke | My prediction | What actually happened | Lesson |
 |---|---|---|---|---|
-| 1 | Drop vs keep the outlier player | _could mess up the analysis_ | _(pending)_ | _(pending)_ |
+| 1 | Drop vs keep the outlier player | could mess up the analysis | gap +0.820 → +0.818 pp, p 0.00160 → 0.00164 — **no change** | An outlier's danger depends on the metric: it wrecks an *average* but is invisible to a *rate* (1 row in 90k). |
+| 2 | Bootstrap with 50 iterations instead of 1,000 | _(pending)_ | _(pending)_ | _(pending)_ |
