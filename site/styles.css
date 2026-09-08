@@ -1,0 +1,335 @@
+/* ============================================================
+   Cookie Cats A/B test — case study
+   World: match-statistics report. Rules and measured type,
+   never boxes. One tonal inversion, reserved for the bootstrap.
+   ============================================================ */
+
+/* Archivo variable, self-hosted: one family, width + weight axes.
+   latin-ext is required — "Gajić" needs U+0107. */
+@font-face{
+  font-family:'Archivo';
+  font-style:normal;
+  font-weight:100 900;
+  font-stretch:62% 125%;
+  font-display:swap;
+  src:url('fonts/archivo-latin.woff2') format('woff2');
+  unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face{
+  font-family:'Archivo';
+  font-style:normal;
+  font-weight:100 900;
+  font-stretch:62% 125%;
+  font-display:swap;
+  src:url('fonts/archivo-latin-ext.woff2') format('woff2');
+  unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root{
+  /* ground + ink */
+  --paper:      oklch(97.4% 0.005 250);
+  --paper-2:    oklch(94.6% 0.009 250);
+  --ink:        oklch(24%   0.032 262);
+  --ink-2:      oklch(44%   0.030 262);   /* secondary text, AA on paper */
+  --ink-3:      oklch(56%   0.022 262);   /* ticks, supplementary only */
+  --rule:       oklch(88%   0.012 258);
+  --rule-firm:  oklch(74%   0.020 258);
+
+  /* the two sides */
+  --cobalt:      oklch(50% 0.170 256);
+  --cobalt-text: oklch(44% 0.160 256);
+  --cobalt-wash: oklch(93% 0.035 256);
+  --rust:        oklch(56% 0.150 34);
+  --rust-text:   oklch(48% 0.145 34);
+  --rust-wash:   oklch(94% 0.030 34);
+
+  /* inverted section */
+  --d-ground: oklch(22%   0.035 262);
+  --d-ink:    oklch(95.5% 0.010 258);
+  --d-ink-2:  oklch(78%   0.030 258);
+  --d-rule:   oklch(34%   0.030 262);
+  --d-cobalt: oklch(72%   0.140 256);
+
+  /* type */
+  --sans: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --f-display: clamp(2.3rem, 6.1vw, 4.35rem);
+  --f-score:   clamp(2.6rem, 7.2vw, 4.9rem);
+  --f-h2:      clamp(1.7rem, 3.6vw, 2.5rem);
+  --f-h3:      clamp(1.1rem, 1.8vw, 1.3rem);
+  --f-body:    1.0625rem;
+  --f-sm:      0.875rem;
+  --f-xs:      0.78rem;
+
+  /* space */
+  --measure: 36rem;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto } }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:var(--f-body);
+  line-height:1.62;
+  font-variation-settings:'wdth' 100,'wght' 400;
+  -webkit-font-smoothing:antialiased;
+  caret-color:var(--cobalt);
+}
+
+/* --- browser surfaces: these ship with defaults belonging to no design --- */
+::selection{ background:var(--cobalt); color:var(--paper) }
+:focus-visible{ outline:2px solid var(--cobalt); outline-offset:3px; border-radius:2px }
+html{ scrollbar-color:var(--rule-firm) var(--paper); scrollbar-width:thin }
+::-webkit-scrollbar{ width:11px; height:11px }
+::-webkit-scrollbar-track{ background:var(--paper) }
+::-webkit-scrollbar-thumb{ background:var(--rule-firm); border:3px solid var(--paper); border-radius:99px }
+::-webkit-scrollbar-thumb:hover{ background:var(--ink-3) }
+
+.skip{
+  position:absolute; left:-9999px; top:0; z-index:99;
+  background:var(--ink); color:var(--paper); padding:.7rem 1.1rem;
+  font-size:var(--f-sm); text-decoration:none;
+}
+.skip:focus{ left:.5rem; top:.5rem }
+
+/* reading progress — wayfinding for a long read */
+.progress{ position:fixed; inset:0 0 auto 0; height:2px; background:transparent; z-index:50 }
+.progress i{ display:block; height:100%; width:0; background:var(--cobalt); transform-origin:left }
+
+/* ---------------- layout ---------------- */
+/* The horizontal inset lives on the band, not inside the measure, so it is
+   explicit on surfaces that carry a background or rule. */
+.wrap{ width:min(100%, 62rem); margin-inline:auto }
+.fixture,.sec,.about{ padding-left:1.375rem; padding-right:1.375rem }
+/* Block padding is stepped rather than clamped so the value is statically
+   resolvable (and predictable) on bordered surfaces. */
+.sec{ padding-top:3.5rem; padding-bottom:3.5rem; border-top:1px solid var(--rule) }
+@media (min-width:56rem){ .sec{ padding-top:7rem; padding-bottom:7rem } }
+.sec .wrap > p,
+.sec .wrap > h2,
+.sec .wrap > h3,
+.sec .wrap > ul{ max-width:var(--measure) }
+
+/* ---------------- type ---------------- */
+h1,h2,h3{ margin:0; text-wrap:balance; letter-spacing:-0.03em; line-height:1.03 }
+
+h1{
+  font-size:var(--f-display);
+  font-variation-settings:'wdth' 112,'wght' 700;
+  letter-spacing:-0.04em;
+  max-width:19ch;
+}
+h2{
+  font-size:var(--f-h2);
+  font-variation-settings:'wdth' 108,'wght' 650;
+  max-width:20ch;
+  margin-bottom:1.1rem;
+}
+h3{
+  font-size:var(--f-h3);
+  font-variation-settings:'wdth' 104,'wght' 640;
+  letter-spacing:-0.02em;
+  margin-top:2.75rem;      /* more space above a heading than below */
+  margin-bottom:.6rem;
+  line-height:1.32;
+}
+p{ margin:0 0 1.15rem }
+b,strong{ font-variation-settings:'wdth' 100,'wght' 660 }
+i,em{ font-style:italic }
+code{ font-family:var(--mono); font-size:.92em; background:var(--paper-2); padding:.1em .35em; border-radius:3px }
+
+a{ color:var(--cobalt-text); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px }
+a:hover{ text-decoration-thickness:2px }
+
+.ico{ width:.72em; height:.72em; margin-left:.32em; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; vertical-align:baseline }
+
+/* ---------------- fixture (first viewport) ---------------- */
+.fixture{ padding-top:3rem; padding-bottom:3rem }
+@media (min-width:56rem){ .fixture{ padding-top:5rem; padding-bottom:5rem } }
+
+.score{ margin:2.5rem 0 2.25rem }
+@media (min-width:56rem){ .score{ margin-top:3.5rem } }
+.score-grid{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:stretch;
+  gap:clamp(1rem,3vw,2.5rem);
+  border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--rule-firm);
+  padding-top:1.4rem; padding-bottom:1.4rem;
+}
+@media (min-width:56rem){ .score-grid{ padding-top:1.9rem; padding-bottom:1.9rem } }
+.side{ display:flex; flex-direction:column; gap:.15rem }
+.side-lose{ text-align:right }
+.side-name{
+  font-size:var(--f-sm); font-variation-settings:'wdth' 96,'wght' 700;
+  letter-spacing:.12em; text-transform:uppercase;
+}
+.side-note{ font-size:var(--f-xs); color:var(--ink-2); letter-spacing:.02em }
+.side-rate{
+  font-size:var(--f-score);
+  font-variation-settings:'wdth' 118,'wght' 720;
+  letter-spacing:-0.045em;
+  line-height:.95;
+  font-variant-numeric:tabular-nums;
+  margin-top:.35rem;
+}
+.side-rate i{ font-style:normal; font-size:.42em; font-variation-settings:'wdth' 100,'wght' 600; margin-left:.08em; vertical-align:.55em }
+.side-win .side-name{ color:var(--cobalt-text) }
+.side-win .side-rate{ color:var(--cobalt) }
+.side-lose .side-name{ color:var(--rust-text) }
+.side-lose .side-rate{ color:var(--rust) }
+
+.score-rule{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.6rem }
+.score-rule::before,.score-rule::after{ content:''; flex:1; width:1px; background:var(--rule-firm); min-height:.75rem }
+.score-rule span{
+  font-size:var(--f-xs); letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-2); font-variation-settings:'wdth' 92,'wght' 620;
+  writing-mode:horizontal-tb; text-align:center; white-space:nowrap;
+}
+
+figcaption{
+  font-size:var(--f-sm); color:var(--ink-2); line-height:1.5;
+  margin-top:.85rem; max-width:46rem;
+}
+.score figcaption{ margin-top:1rem }
+
+.lede{ font-size:clamp(1.1rem,1.9vw,1.3rem); line-height:1.5; max-width:34rem; color:var(--ink) }
+
+.verdict,.stats{
+  display:flex; flex-wrap:wrap; gap:0;
+  margin:2rem 0 1.75rem; padding:0;
+  border-top:1px solid var(--rule);
+}
+.verdict > div,.stats > div{ padding:.85rem 1.6rem }
+.verdict > div:first-child,.stats > div:first-child{ padding-left:0 }
+.verdict > div + div,.stats > div + div{ border-left:1px solid var(--rule) }
+dt{
+  font-size:var(--f-xs); letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-2); font-variation-settings:'wdth' 94,'wght' 640; margin-bottom:.25rem;
+}
+dd{
+  margin:0; font-size:1.05rem; font-variation-settings:'wdth' 102,'wght' 640;
+  font-variant-numeric:tabular-nums;
+}
+dd.hi{ color:var(--cobalt) }
+
+.byline{
+  display:flex; flex-wrap:wrap; gap:1.4rem; align-items:baseline;
+  font-size:var(--f-sm); margin:0; color:var(--ink-2);
+}
+.byline > span{ font-variation-settings:'wdth' 100,'wght' 640; color:var(--ink) }
+
+/* ---------------- figures ---------------- */
+.fig{ margin:2.5rem 0 2.25rem }
+.fig-wide{ margin-inline:0 }
+.chart{ width:100%; height:calc(var(--h,240) * 1px); max-height:62vh }
+.chart svg{ display:block; width:100%; height:100% ; overflow:visible }
+
+.tick{ font-size:11.5px; fill:var(--ink-3); font-variation-settings:'wdth' 96,'wght' 520; font-variant-numeric:tabular-nums }
+.tick-strong{ fill:var(--ink-2); font-variation-settings:'wdth' 96,'wght' 640 }
+.axis{ stroke:var(--rule); stroke-width:1 }
+.axis-firm{ stroke:var(--rule-firm); stroke-width:1 }
+.lbl{ font-size:12.5px; font-variation-settings:'wdth' 98,'wght' 660; fill:var(--ink) }
+.val{ font-size:15px; font-variation-settings:'wdth' 104,'wght' 700; font-variant-numeric:tabular-nums }
+
+/* ---------------- theories (proximity, not boxes) ---------------- */
+.theories{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));
+  gap:clamp(1.5rem,3vw,2.75rem); margin:2.25rem 0 2rem;
+}
+/* a hairline, not a slab: a thick one-sided accent border is the tell */
+.theory{ border-top:1px solid var(--rule-firm); padding-top:1rem }
+.theory h3{ margin-top:0; margin-bottom:.5rem }
+.theory p{ font-size:.98rem; margin-bottom:.7rem }
+.theory-mine{ border-top-color:var(--rust) }
+.theory:not(.theory-mine){ border-top-color:var(--cobalt) }
+.theory-tag{
+  font-size:var(--f-xs); letter-spacing:.11em; text-transform:uppercase;
+  font-variation-settings:'wdth' 94,'wght' 660; margin-bottom:0;
+}
+.theory-mine .theory-tag{ color:var(--rust-text) }
+.theory:not(.theory-mine) .theory-tag{ color:var(--cobalt-text) }
+
+/* ---------------- emphasis ---------------- */
+.pull{
+  font-size:clamp(1.12rem,2vw,1.32rem); line-height:1.48;
+  font-variation-settings:'wdth' 104,'wght' 520;
+  margin:2rem 0; max-width:34rem; color:var(--ink);
+}
+.huge{
+  font-size:clamp(2rem,5vw,3.2rem); line-height:1;
+  font-variation-settings:'wdth' 112,'wght' 700; letter-spacing:-0.04em;
+  margin:2rem 0 1.25rem; font-variant-numeric:tabular-nums;
+}
+.huge b{ font-variation-settings:'wdth' 118,'wght' 760; color:var(--d-cobalt) }
+
+.next{ padding-left:0; list-style:none; margin:1.5rem 0 0 }
+.next li{ padding:1rem 0; border-top:1px solid var(--rule); max-width:var(--measure) }
+.next li:last-child{ border-bottom:1px solid var(--rule) }
+
+.sec-verdict .rec{
+  border-top:1px solid var(--cobalt); border-bottom:1px solid var(--rule-firm);
+  padding:1.5rem 0 1.25rem; max-width:38rem;
+}
+.sec-verdict .rec p:first-child{
+  font-size:clamp(1.25rem,2.4vw,1.6rem); line-height:1.3;
+  font-variation-settings:'wdth' 106,'wght' 680; letter-spacing:-0.02em;
+}
+
+/* ---------------- the one tonal inversion ---------------- */
+.invert{
+  background:var(--d-ground); color:var(--d-ink); border-top:0;
+  /* light text on dark: more leading, a touch more tracking, one step up in weight */
+  line-height:1.7; letter-spacing:.004em;
+}
+.invert p{ font-variation-settings:'wdth' 100,'wght' 440 }
+.invert h2{ color:var(--d-ink) }
+.invert b,.invert strong{ font-variation-settings:'wdth' 100,'wght' 680 }
+.invert figcaption{ color:var(--d-ink-2) }
+.invert .tick{ fill:var(--d-ink-2) }
+.invert .tick-strong{ fill:var(--d-ink) }
+.invert .axis{ stroke:var(--d-rule) }
+.invert .axis-firm{ stroke:var(--d-rule) }
+.invert .lbl{ fill:var(--d-ink) }
+.invert ::selection{ background:var(--d-cobalt); color:var(--d-ground) }
+
+/* ---------------- about ---------------- */
+.about{ padding-top:3.5rem; padding-bottom:3.5rem; border-top:2px solid var(--ink); background:var(--paper-2) }
+@media (min-width:56rem){ .about{ padding-top:6rem; padding-bottom:6rem } }
+.about p{ max-width:var(--measure) }
+.about .byline{ margin-top:2rem; gap:1.5rem }
+.colophon{ font-size:var(--f-sm); color:var(--ink-2); margin-top:2rem; padding-top:1.25rem; border-top:1px solid var(--rule) }
+
+/* ---------------- motion ----------------
+   Content is visible by default; JS opts in to the reveal.       */
+.js-on [data-reveal]{ opacity:0; transform:translateY(14px) }
+.js-on [data-reveal].is-in{
+  opacity:1; transform:none;
+  transition:opacity .62s var(--ease), transform .62s var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .js-on [data-reveal]{ opacity:1; transform:none; transition:none }
+  .progress i{ transition:none }
+}
+
+/* ---------------- narrow ---------------- */
+@media (max-width:44rem){
+  .score-grid{ grid-template-columns:1fr; gap:1.25rem; padding-block:1.25rem }
+  .side-lose{ text-align:left }
+  .score-rule{ flex-direction:row; gap:.75rem }
+  .score-rule::before,.score-rule::after{ width:auto; height:1px; min-height:0; flex:1 }
+  .verdict > div,.stats > div{ width:100%; padding-left:0; padding-right:0;
+    border-left:0; border-bottom:1px solid var(--rule) }
+  .verdict > div + div,.stats > div + div{ border-left:0 }
+  .verdict > div:last-child,.stats > div:last-child{ border-bottom:0 }
+  h1{ max-width:none }
+}

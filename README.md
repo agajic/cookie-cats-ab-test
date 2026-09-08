@@ -10,6 +10,10 @@ change affected how many players came back.
 Full analysis: [`cookie_cats_ab_test.ipynb`](cookie_cats_ab_test.ipynb).
 The reasoning behind every decision is logged step-by-step in [`DECISIONS.md`](DECISIONS.md).
 
+**There is also an interactive write-up of this analysis** — the same findings as a visual,
+scrollable case study, with every chart drawn at runtime from the analysis output. Source in
+[`site/`](site/); see [`DESIGN.md`](DESIGN.md) for how it was built.
+
 ## The question
 A "gate" forces players to wait (or pay) to continue past a level. The team moved that gate
 from level 30 to level 40. Did more players come back as a result?
@@ -58,6 +62,8 @@ the answer, at the moment you'd make the prediction.
 | `DECISIONS.md` | Decision journal — why each choice was made |
 | `cookie_cats.csv` | The dataset (~90k players) |
 | `requirements.txt` | Dependencies |
+| `site/` | Interactive case-study site (static, deployed on Vercel) |
+| `DESIGN.md` | Design documentation for the site |
 
 ## How to run
 ```bash
