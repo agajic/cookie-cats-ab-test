@@ -13,7 +13,6 @@ affected how many players came back.
 |---|---|
 | Case study | [cookie-cats-ab-test-andrej.vercel.app](https://cookie-cats-ab-test-andrej.vercel.app/) |
 | Notebook | [`cookie_cats_ab_test.ipynb`](cookie_cats_ab_test.ipynb) |
-| Decision log | [`DECISIONS.md`](DECISIONS.md) |
 
 ## The question
 
@@ -71,7 +70,6 @@ you would have to make the prediction.
 | Path | What it is |
 |---|---|
 | `cookie_cats_ab_test.ipynb` | The full analysis, top to bottom |
-| `DECISIONS.md` | Why each analytical choice was made |
 | `site/` | Source of the case-study site |
 | `DESIGN.md` | How the site was designed and built |
 | `cookie_cats.csv` | The dataset |
