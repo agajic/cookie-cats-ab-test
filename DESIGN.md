@@ -5,8 +5,8 @@ Documents the visual world as built. Written from the finished build, not before
 **Surface:** `site/index.html`, a single long-form case study.
 **Visitor mode:** Read — the visitor must understand an analysis; comprehension *is* the
 persuasion. Structure serves reading first, expression second.
-**Build path:** code-led (no image generation available), so there is no comp; the ambition
-lives in the first viewport and the signature interaction.
+**Approach:** built directly in code rather than from a static mockup, with the ambition
+carried by the first viewport and by one signature interaction.
 
 ## The world
 
@@ -90,13 +90,13 @@ The AUC chart starts at 0.5 and says so, because 0.5 is chance, not zero.
 Text selection, focus rings, caret and scrollbar are themed from the palette rather than
 left at browser defaults.
 
-## Known detector findings
+## Known lint warnings
 
-`impeccable detect` reports 5 remaining warnings, each verified against the rendered result
-and judged a false positive rather than fixed by contortion:
+A static CSS scan reports five warnings. Each was checked against the rendered page and
+judged a false positive rather than worked around:
 
-- **4 × cramped-padding** on the verdict/stat dividers. The scanner flattens `@media`
-  blocks, so it applies the narrow-viewport `padding-left:0` unconditionally. Confirmed by
-  flipping which side the mobile override zeroes: the finding moved with it. At every real
-  viewport the padding is 1.6rem.
-- **1 × tight-leading** on display type, where leading below 1.3 is the intended setting.
+- **Four on the verdict and stat dividers.** The scanner flattens `@media` blocks, so it
+  applies the narrow-viewport `padding-left:0` unconditionally. Confirmed by flipping which
+  side the mobile override zeroes, since the warning moved with it. At every real viewport
+  the padding is 1.6rem.
+- **One on display type**, where leading below 1.3 is the intended setting.
